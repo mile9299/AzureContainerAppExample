@@ -1,0 +1,69 @@
+trigger:
+  - main  # Adjust to your branch
+
+pool:
+  vmImage: 'ubuntu-latest'  # Runs on an Ubuntu agent
+
+variables:
+  - template: variables/variables.yaml
+
+steps:
+  - task: AzureCLI@2
+    displayName: 'Azure Login'
+    inputs:
+      azureSubscription: $(AzureSubscription)
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        echo "Logging into Azure..."
+        az login --service-principal --username $(APP_ID) --password $(CLIENT_SECRET) --tenant $(TENANT_ID)
+  - script: |
+      echo "Logging into Azure Container Registry..."
+      docker login $(ACR_NAME) -u $(ACR_USERNAME) -p $(ACR_PASSWORD)
+    displayName: 'Docker Login to Azure Container Registry'
+        
+  - script: |
+      echo "Fetching latest Falcon container sensor..."
+      LATESTSENSOR=$(bash <(curl -Ls https://github.com/CrowdStrike/falcon-scripts/releases/latest/download/falcon-container-sensor-pull.sh) -t falcon-container | tail -1)
+      echo "Tagging and pushing sensor image..."
+      docker tag "$LATESTSENSOR" "$(MY_REPO):latest"
+      docker push "$(MY_REPO):latest"
+    displayName: 'Pull, Tag, and Push Falcon Sensor'
+
+  - script: |
+      echo "Extracting falconutil..."
+      id=$(docker create "$(MY_REPO):latest")
+      docker cp "$id:/usr/bin/falconutil" /tmp
+      docker rm -v "$id"
+    displayName: 'Extract Falconutil'
+
+  - script: |
+      echo "Patching vulnerable application image..."
+      /tmp/falconutil patch-image aci \
+        --source-image-uri "$(SOURCE_IMAGE)" \
+        --target-image-uri "$(TARGET_IMAGE)" \
+        --falcon-image-uri "$(MY_REPO):latest" \
+        --cid "$(FALCON_CID)" \
+        --container "$(CONTAINER_NAME)" \
+        --container-group "$(CONTAINER_GROUP_NAME)" \
+        --resource-group "$(RESOURCE_GROUP)" \
+        --subscription "$(SUBSCRIPTION_ID)"
+    displayName: 'Patch Vulnerable Image'
+
+  - script: |
+      echo "Pushing patched image..."
+      docker push "$(TARGET_IMAGE)"
+    displayName: 'Push Patched Image'
+
+  - task: AzureCLI@2
+    displayName: 'Deploy to Azure Container Apps'
+    inputs:
+      azureSubscription: $(AzureSubscription)
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        echo "Deploying patched container to Azure Container Apps..."
+        az containerapp update \
+          --name "$(CONTAINER_APP_NAME)" \
+          --resource-group "$(RESOURCE_GROUP)" \
+          --image "$(TARGET_IMAGE)"
