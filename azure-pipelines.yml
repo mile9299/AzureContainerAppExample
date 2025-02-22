@@ -24,9 +24,13 @@ steps:
       docker login "$(ACR_NAME)" -u "$(ACR_USERNAME)" -p "$(ACR_PASSWORD)"
     displayName: 'Docker Login to Azure Container Registry'
 
-  - script: | # Build Docker Image
-      echo "Building Docker image..."
-      docker build -t "$(TARGET_IMAGE):latest" -f Dockerfile .
+  - task: Docker@2
+  displayName: Build and push Docker image
+  inputs:
+    command: build
+    Dockerfile: '**/Dockerfile'  # Path to your Dockerfile
+    repository: "$(TARGET_IMAGE)"  # e.g., mycontainerregistry.azurecr.io/my-app
+    tags: latest
     displayName: 'Build, Tag, and Push Falcon Sensor'
 
   - task: AzureCLI@2
