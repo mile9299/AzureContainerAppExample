@@ -26,7 +26,7 @@ steps:
 
   - script: | # Build Docker Image
       echo "Building Docker image..."
-      docker build -t "$(ACR_NAME)/$(IMAGE_NAME):latest" -f Dockerfile .
+      docker build -t "$(ACR_NAME)/$(TARGET_IMAGE):latest" -f Dockerfile .
     displayName: 'Build, Tag, and Push Falcon Sensor'
 
   - task: AzureCLI@2
