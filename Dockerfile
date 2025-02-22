@@ -1,5 +1,5 @@
 # Fix the FROM statement by ensuring a valid image reference
-FROM falcon-sensor:0.1-1.container.x86_64.Release.US1 AS build
+FROM "teds2acr.azurecr.io/falcon-container" AS build
 
 # Ensure paths and commands are correctly formatted
 RUN mkdir -p /tmp/CrowdStrike/rootfs/usr/bin && \
