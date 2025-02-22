@@ -5,7 +5,7 @@ pool:
   vmImage: 'ubuntu-latest'  # Runs on an Ubuntu agent
 
 variables:
-  - template: variables/variables.yaml
+ # - template: variables/variables.yaml
   - group: "ACA_VARIABLES" # specific to AzureDevOps 
 
 steps: 
