@@ -30,6 +30,7 @@ ENV FALCONCTL_OPTS="--cid=5DDB0407BEF249C19C7A975F17979A1F-90 --tags=--trace=err
     CS_CONTAINER="TedsContainerApp" \
     CS_CLOUD_SERVICE="ACA" \
     CS_FALCON_SENSOR_ROOT="/opt/CrowdStrike/rootfs"
-
+    FALCON_CLIENT_ID="f7c1103ada9d4bf3a81aa8065d6aaff0"
+    FALCON_CLIENT_SECRET="Emy36T0IX4Nw1Sndxvrsa7GpPg52zkBYcA8i01U9"
 # Fix the entrypoint command format
 ENTRYPOINT ["/opt/CrowdStrike/rootfs/bin/falcon-entrypoint", "/entrypoint.sh"]
