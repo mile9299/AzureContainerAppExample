@@ -45,8 +45,8 @@ steps:
     inputs:
       command: build
       Dockerfile: '**/Dockerfile'  # Path to your Dockerfile
-      repository: "$(MY_REPO)"  # e.g., mycontainerregistry.azurecr.io/my-app
-      tags: latest
+     # repository: "$(MY_REPO)"  
+     # tags: latest
     displayName: 'Build, Tag, and Push Falcon Sensor'
 
   - task: AzureCLI@2
