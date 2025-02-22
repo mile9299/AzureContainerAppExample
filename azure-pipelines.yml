@@ -30,31 +30,6 @@ steps:
       docker push "$(MY_REPO):latest"
     displayName: 'Pull, Tag, and Push Falcon Sensor'
 
-  - script: |
-      echo "Extracting falconutil..."
-      id=$(docker create "$(MY_REPO):latest")
-      docker cp "$id:/usr/bin/falconutil" /tmp
-      docker rm -v "$id"
-    displayName: 'Extract Falconutil'
-
-  - script: |
-      echo "Patching vulnerable application image..."
-      /tmp/falconutil patch-image aci \
-        --source-image-uri "$(SOURCE_IMAGE)" \
-        --target-image-uri "$(TARGET_IMAGE)" \
-        --falcon-image-uri "$(MY_REPO):latest" \
-        --cid "$(FALCON_CID)" \
-        --container "$(CONTAINER_NAME)" \
-        --container-group "$(CONTAINER_GROUP_NAME)" \
-        --resource-group "$(RESOURCE_GROUP)" \
-        --subscription "$(SUBSCRIPTION_ID)"
-    displayName: 'Patch Vulnerable Image'
-
-  - script: |
-      echo "Pushing patched image..."
-      docker push "$(TARGET_IMAGE)"
-    displayName: 'Push Patched Image'
-
   - task: AzureCLI@2
     displayName: 'Deploy to Azure Container Apps'
     inputs:
