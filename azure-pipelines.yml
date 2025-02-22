@@ -8,7 +8,7 @@ variables:
   - template: variables/variables.yaml
   - group: "ACA_VARIABLES" # specific to AzureDevOps 
 
-steps: # Azure Login
+steps: 
   - task: AzureCLI@2
     displayName: 'Azure Login'
     inputs:
@@ -23,24 +23,11 @@ steps: # Azure Login
       echo "Logging into Azure Container Registry..."
       docker login "$(ACR_NAME)" -u "$(ACR_USERNAME)" -p "$(ACR_PASSWORD)"
     displayName: 'Docker Login to Azure Container Registry'
-        
-  - script: | # Dowloading latest Falcon Container Sensor
-      echo "Fetching latest Falcon container sensor..."
-      export FALCON_CLIENT_ID="$(FALCON_CLIENT_ID)"
-      export FALCON_CLIENT_SECRET="$(FALCON_CLIENT_SECRET)"
-      
-      LATESTSENSOR=$(bash <(curl -Ls https://github.com/CrowdStrike/falcon-scripts/releases/latest/download/falcon-container-sensor-pull.sh) \
-        -u "$(FALCON_CLIENT_ID)" \
-        -s "$(FALCON_CLIENT_SECRET)" \
-        --type falcon-sensor \
-        --platform x86_64 \
-        --region us-1 \
-        --type falcon-container | tail -1)
-        
-      echo "Tagging and pushing sensor image..."
-      docker tag "$LATESTSENSOR" "$(MY_REPO):latest"
-      docker push "$(MY_REPO):latest"
-    displayName: 'Pull, Tag, and Push Falcon Sensor'
+
+  - script: | # Build Docker Image
+      echo "Building Docker image..."
+      docker build -t "$(ACR_NAME)/$(IMAGE_NAME):latest" -f Dockerfile .
+    displayName: 'Build, Tag, and Push Falcon Sensor'
 
   - task: AzureCLI@2
     displayName: 'Deploy to Azure Container Apps'
