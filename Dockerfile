@@ -18,7 +18,7 @@ RUN mkdir -p /tmp/CrowdStrike/rootfs/etc/ssl/certs && \
 RUN chmod -R a=rX /tmp/CrowdStrike
 
 # Fix the base image name
-FROM ubuntu:test
+FROM ubuntu:20.04
 
 # Copy built files from the previous stage
 COPY --from=build /tmp/CrowdStrike /opt/CrowdStrike
