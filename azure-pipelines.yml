@@ -23,12 +23,29 @@ steps:
       echo "Logging into Azure Container Registry..."
       docker login "$(ACR_NAME)" -u "$(ACR_USERNAME)" -p "$(ACR_PASSWORD)"
     displayName: 'Docker Login to Azure Container Registry'
-
+    
+  - script: | # Dowloading latest Falcon Container Sensor
+      echo "Fetching latest Falcon container sensor..."
+      export FALCON_CLIENT_ID="$(FALCON_CLIENT_ID)"
+      export FALCON_CLIENT_SECRET="$(FALCON_CLIENT_SECRET)" 
+      LATESTSENSOR=$(bash <(curl -Ls https://github.com/CrowdStrike/falcon-scripts/releases/latest/download/falcon-container-sensor-pull.sh) \
+        -u "$(FALCON_CLIENT_ID)" \
+        -s "$(FALCON_CLIENT_SECRET)" \
+        --type falcon-sensor \
+        --platform x86_64 \
+        --region us-1 \
+        --type falcon-container | tail -1)
+        
+      echo "Tagging and pushing sensor image..."
+      docker tag "$LATESTSENSOR" "$(MY_REPO):latest"
+      docker push "$(MY_REPO):latest"
+    displayName: 'Pull, Tag, and Push Falcon Sensor'
+    
   - task: Docker@2
     inputs:
       command: build
       Dockerfile: '**/Dockerfile'  # Path to your Dockerfile
-      repository: "$(TARGET_IMAGE)"  # e.g., mycontainerregistry.azurecr.io/my-app
+      repository: "$(MY_REPO)"  # e.g., mycontainerregistry.azurecr.io/my-app
       tags: latest
     displayName: 'Build, Tag, and Push Falcon Sensor'
 
