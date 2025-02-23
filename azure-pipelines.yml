@@ -20,9 +20,8 @@ steps:
 
         az login --service-principal --username "$(APP_ID)" --password "$(CLIENT_SECRET)" --tenant "$(TENANT_ID)"
         az role assignment create \
-        --assignee $(APP_ID) \
-      # --scope /subscriptions/$(SUBSCRIPTION_ID)/resourceGroups/$(RESOURCE_GROUP)/providers/Microsoft.ContainerRegistry/registries/$(ACR_NAME) \
-        --scope subscriptions/5a84cb53-b383-44db-bd58-c65ca3dfcb8c/resourceGroups/TedsAKS-2_group/providers/Microsoft.ContainerRegistry/registries/teds2acr \ 
+        --assignee $(APP_ID) \ 
+        --scope /subscriptions/5a84cb53-b383-44db-bd58-c65ca3dfcb8c/resourceGroups/TedsAKS-2_group/providers/Microsoft.ContainerRegistry/registries/teds2acr \ 
         --role AcrPull
         
   - script: | # Docker Login
