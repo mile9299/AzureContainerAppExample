@@ -22,7 +22,7 @@ steps:
   - task: AzureCLI@2
     displayName: 'Assign AcrPull Role'
     inputs:
-      azureSubscription: $(SUBSCRIPTION_ID)
+      azureSubscription: $(AzureSubscription)
       scriptType: bash
       scriptLocation: inlineScript
       inlineScript: |
