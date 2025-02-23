@@ -16,27 +16,7 @@ steps:
       scriptLocation: inlineScript
       inlineScript: |
         echo "Logging into Azure..."
-        az login --service-principal --username "$(APP_ID)" --password "$(CLIENT_SECRET)" --tenant "$(TENANT_ID)"
-
-  - task: AzureCLI@2
-    displayName: 'Assign AcrPull Role'
-    inputs:
-      azureSubscription: $(AzureSubscription)
-      scriptType: bash
-      scriptLocation: inlineScript
-      inlineScript: |
-        echo "Assigning AcrPull role to service principal..."
-        ACR_ID=$(az acr show --name $(ACR_NAME) --resource-group $(RESOURCE_GROUP) --query "id" --output tsv)
-
-        # Debug: Output the ACR ID
-        echo "ACR_ID: $ACR_ID"
-
-        if [ -z "$ACR_ID" ]; then
-          echo "ERROR: ACR ID not found. Please check if the ACR name and resource group are correct."
-          exit 1
-        fi
-
-        az role assignment create --assignee "$(APP_ID)" --scope "$ACR_ID" --role "AcrPull"
+        az login --service-principal --username "$(APP_ID)" --password "$(CLIENT_SECRET)" --tenant "$(TENANT_ID)
 
   - script: |  # Docker Login
       echo "Logging into Azure Container Registry..."
