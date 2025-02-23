@@ -48,6 +48,25 @@ steps:
     displayName: 'Build, Patching, and Pushing Patched Falcon Sensor'
 
   - task: AzureCLI@2
+    displayName: 'Ensure Azure Container App Exists'
+    inputs:
+      azureSubscription: $(AzureSubscription)
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        echo "Checking if container app exists..."
+        if ! az containerapp show --name "$(CONTAINER_APP_NAME)" --resource-group "$(RESOURCE_GROUP)" &>/dev/null; then
+          echo "Container app does not exist. Creating..."
+          az containerapp create \
+            --name "$(CONTAINER_APP_NAME)" \
+            --resource-group "$(RESOURCE_GROUP)" \
+            --image "$(TARGET_IMAGE)" \
+            --environment "$(CONTAINER_ENVIRONMENT)"
+        else
+          echo "Container app exists. Proceeding with update..."
+        fi
+
+  - task: AzureCLI@2
     displayName: 'Deploy to Azure Container Apps'
     inputs:
       azureSubscription: $(AzureSubscription)
