@@ -1,7 +1,7 @@
-# Fix the FROM statement by ensuring a valid image reference
+# Add path to valid image reference
 FROM "teds2acr.azurecr.io/falcon-container" AS build
 
-# Ensure paths and commands are correctly formatted
+
 RUN mkdir -p /tmp/CrowdStrike/rootfs/usr/bin && \
     cp -R /usr/bin/falcon* /usr/bin/injector /tmp/CrowdStrike/rootfs/usr/bin
 
@@ -17,11 +17,11 @@ RUN mkdir -p /tmp/CrowdStrike/rootfs/etc/ssl/certs && \
 
 RUN chmod -R a=rX /tmp/CrowdStrike
 
-# Fix the base image name
+# Add source image
 FROM "teds2acr.azurecr.io/aci-vulapp:crwdv1"
 
 # Copy built files from the previous stage
 COPY --from=build /tmp/CrowdStrike /opt/CrowdStrike
 
-# Fix the entrypoint command format
+# Update the entrypoint command
 ENTRYPOINT ["/opt/CrowdStrike/rootfs/bin/falcon-entrypoint", "/entrypoint.sh"]
